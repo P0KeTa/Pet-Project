@@ -14,8 +14,8 @@ public class MainPage {
 
     protected static final By btnApplyCookies = By.xpath("//div[text()='Allow all']");
 
-    protected static final By btnCatalog = By.xpath("//button[@class='ds-button ds-button_variant_text ds-button_type_primary ds-button_size_m ds-button_brand_market _WsTn']");
-    protected static final By electronicalSection = By.xpath("//span[@class='_3W4t0' and text()='Электроника']");
+    protected static final By btnCatalog = By.xpath("//div[@data-zone-name='catalog']");
+    protected static final By electronicalSection = By.xpath("//div[@data-auto='catalog-content']//span[text()='Электроника']");
     protected static final By btnLaptop = By.xpath("//a[text()='Ноутбуки']");
 
 

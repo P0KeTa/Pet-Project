@@ -11,6 +11,10 @@ import ru.p0keta.Yandex.Market.pages.MainPage;
 import java.time.Duration;
 import java.util.List;
 
+/**
+ * Шаги для работы с главной страницей на Яндекс.Маркете.
+ * Содержит методы для перехода на нужные разделы на странице и клика по кнопке согласия Куки.
+ */
 public class MainPageSteps extends MainPage {
     WebElement element;
     Actions action;
@@ -20,7 +24,7 @@ public class MainPageSteps extends MainPage {
         super(driver);
     }
 
-    @Step("Клик по кнопке согласия куки")
+    @Step("Клик по кнопке согласия Куки")
     public void clickBtnApplyCookies() {
         List<WebElement> cookies = driver.findElements(btnApplyCookies);
 

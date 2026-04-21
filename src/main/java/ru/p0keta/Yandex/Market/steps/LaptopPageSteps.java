@@ -13,6 +13,10 @@ import java.util.List;
 
 import static ru.p0keta.Yandex.Market.pages.SearchPage.inputSearch;
 
+/**
+ * Шаги для работы со страницей ноутбуков на Яндекс.Маркете.
+ * Содержит методы для установки фильтров и проверки результатов.
+ */
 public class LaptopPageSteps extends LaptopPage {
 
     WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
@@ -27,38 +31,54 @@ public class LaptopPageSteps extends LaptopPage {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(laptopText)).isDisplayed();
     }
 
+    /**
+     * Устанавливает диапазон цены.
+     *
+     * @param priceFrom нижняя граница цены
+     * @param priceTo верхняя граница цены
+     */
     @Step("Установка параметра Цена")
     public void setPrice(String priceFrom, String priceTo) {
         driver.findElement(inputPriceFrom).sendKeys(priceFrom);
         driver.findElement(inputPriceTo).sendKeys(priceTo);
     }
 
+    /**
+     * Устанавливает необходимые бренды.
+     *
+     * @param brands строка брендов через запятую, например "HP, Lenovo"
+     */
     @Step("Установка параметра Производитель")
-    public void setModel(@NonNull String models) {
-        String[] modelArr = models.split(",");
+    public boolean setModel(@NonNull String brands) {
+        String[] brandArr = brands.split(",");
+
+        boolean brandFound = true;
 
         if (!driver.findElements(btnGetAll).isEmpty()) {
             wait.until(ExpectedConditions.elementToBeClickable(btnGetAll)).click();
         }
 
-        for (String model : modelArr) {
-            model = model.trim();
+        for (String brand : brandArr) {
+            brand = brand.trim();
             if (!driver.findElements(inputModel).isEmpty()) {
                 element = wait.until(ExpectedConditions.elementToBeClickable(inputModel));
-                element.sendKeys(model);
+                element.sendKeys(brand);
             }
 
-            By checkboxModel = By.xpath("//div//span[text()='" + model + "']");
+            By checkboxModel = By.xpath("//div//span[text()='" + brand + "']");
 
             if (!driver.findElements(checkboxModel).isEmpty()) {
                 wait.until(ExpectedConditions.elementToBeClickable(checkboxModel)).click();
-                driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(5));
+            } else {
+                brandFound = false;
+                continue;
             }
             if (!driver.findElements(inputModel).isEmpty()) {
                 driver.findElement(inputModelCancel).click();
-                driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(5));
             }
         }
+
+        return brandFound;
     }
 
     @Step("Проверяем кол-во элементов на первой странице")
@@ -67,6 +87,10 @@ public class LaptopPageSteps extends LaptopPage {
         return products.size();
     }
 
+    /**
+     * Медленный скролл до конца страницы и возврат в начало страницы.
+     * Каждые 0.5 сек пролистывает страницу на 500 пикселей
+     */
     @Step("Плавно скроллим и ждём загрузку всех товаров")
     public void loadAllProducts() {
         JavascriptExecutor js = (JavascriptExecutor) driver;
@@ -89,9 +113,8 @@ public class LaptopPageSteps extends LaptopPage {
         //Скролл в начало страницы
         js.executeScript("window.scrollTo(0, 0);");
     }
-
     private void waitForMoreProducts(int previousCount) {
-        long endTime = System.currentTimeMillis() + 500L;
+        long endTime = System.currentTimeMillis() + 700L;
         while (System.currentTimeMillis() < endTime) {
             int currentCount = driver.findElements(productLocator).size();
             if (currentCount > previousCount) {
@@ -99,7 +122,6 @@ public class LaptopPageSteps extends LaptopPage {
             }
         }
     }
-
     private boolean isAtBottom() {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         Object result = js.executeScript(
@@ -107,6 +129,13 @@ public class LaptopPageSteps extends LaptopPage {
         return Boolean.TRUE.equals(result);
     }
 
+    /**
+     * Проверяет, что цены всех товаров находятся в заданном диапазоне.
+     *
+     * @param priceFrom нижняя граница цены
+     * @param priceTo верхняя граница цены
+     * @return список некорректных значений цен
+     */
     @Step("Проверяем соответствие фильтра Цена")
     public boolean checkPrice(String priceFrom, String priceTo) {
         List<WebElement> products = driver.findElements(productLocatorPrice);
@@ -129,39 +158,32 @@ public class LaptopPageSteps extends LaptopPage {
         return result.isEmpty();
     }
 
+    /**
+     * Проверяет, что все товары на странице соответствуют переданным брендам.
+     *
+     * @param brands строка брендов через запятую, например "HP, Lenovo"
+     * @return список товаров, которые не соответствуют фильтру
+     */
     @Step("Проверяем соответствие фильтра Модель")
-    public boolean checkModel(@NonNull String models) {
-        if (models.isEmpty()) {
-            return false;
-        } else {
-            List<WebElement> products = driver.findElements(setLocator(models));
-            List<String> result = new ArrayList<>();
-            String[] modelsArr = models.split(",");
+    public List<String> checkModel(@NonNull String brands) {
+        List<WebElement> products = driver.findElements(productLocatorName);
+        List<String> result = new ArrayList<>();
+        String[] modelsArr = brands.split(",");
 
-            for (WebElement product : products) {
-                for (String s : modelsArr) {
-                    String m = s.trim();
-                    if (!(product.getText().equals(m))) {
-                        result.add(s);
-                    }
+        for (WebElement product : products) {
+            String title = product.getText().trim().toLowerCase();
+            boolean matches = false;
+            for (String s : modelsArr) {
+                if (title.contains(s.trim().toLowerCase())) {
+                    matches = true;
+                    break;
                 }
             }
-            return result.isEmpty();
-        }
-    }
-
-    private @NonNull By setLocator(@NonNull String model) {
-        String[] models = model.split(",");
-        StringBuilder xpath = new StringBuilder("//div[@data-auto-themename='list_full']//span[");
-        for (int i = 0; i < models.length; i++) {
-            String m = models[i].trim();
-            xpath.append("contains(@title,'").append(m).append("')");
-            if (i < models.length - 1) {
-                xpath.append(" or ");
+            if (!matches) {
+                result.add(title);
             }
         }
-        xpath.append("]");
-        return By.xpath(xpath.toString());
+        return result;
     }
 
     @Step("Вводим в поисковую строку наименование ноутбука из первой карточки и кликаем по кнопке Найти")

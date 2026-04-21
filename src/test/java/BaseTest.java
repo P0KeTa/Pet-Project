@@ -1,5 +1,3 @@
-package tests;
-
 import io.github.bonigarcia.wdm.WebDriverManager;
 import io.qameta.allure.Step;
 import org.junit.jupiter.api.*;
@@ -13,7 +11,10 @@ import ru.p0keta.Yandex.Market.steps.SearchPageSteps;
 
 import java.time.Duration;
 import java.util.Objects;
-
+/**
+ * Базовый класс всех тестов
+ * Содержит методы для инициализации WebDriver/классов, открытие браузера, ожидания загрузки, открытия страницы и закрытия браузера
+ */
 public class BaseTest {
 
     WebDriver driver;
@@ -34,13 +35,12 @@ public class BaseTest {
     @Step("Открытие главной страницы")
     public void goPage(String urlPage) {
         driver.manage().window().maximize();
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
         driver.get(urlPage);
     }
 
     @Step("Ожидание загрузни страницы")
     public void waitLoadPage() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(Integer.parseInt(ConfigReader.get("timeout"))));
         wait.until(webDriver -> Objects.equals(((JavascriptExecutor) webDriver).executeScript("return document.readyState"), "complete"));
     }
 
