@@ -19,7 +19,7 @@ import java.util.List;
 public class MainPageSteps extends MainPage {
     WebElement element;
     Actions action;
-    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(Integer.parseInt(ConfigReader.get("timeout"))));
+    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(ConfigReader.getInt("timeout")));
 
     public MainPageSteps(WebDriver driver) {
         super(driver);

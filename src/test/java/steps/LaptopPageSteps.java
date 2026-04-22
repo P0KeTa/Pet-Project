@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class LaptopPageSteps extends LaptopPage {
 
-    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(Integer.parseInt(ConfigReader.get("timeout"))));
+    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(ConfigReader.getInt("timeout")));
     WebElement element;
 
     public LaptopPageSteps(WebDriver driver) {
@@ -171,7 +171,7 @@ public class LaptopPageSteps extends LaptopPage {
                 continue;
             }
             int price = Integer.parseInt(digitsOnly);
-            if (price <= min || price >= max) {
+            if (price < min || price > max) {
                 result.add(String.valueOf(price));
             }
         }
@@ -217,8 +217,7 @@ public class LaptopPageSteps extends LaptopPage {
         String nameFirstProduct = products.get(0).getText();
         driver.findElement(inputSearch).sendKeys(nameFirstProduct);
         driver.findElement(btnSearch).click();
-        driver.manage().timeouts()
-                .pageLoadTimeout(Duration.ofSeconds(Integer.parseInt(ConfigReader.get("timeout"))));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(productLocator));
         return nameFirstProduct;
     }
 }

@@ -13,7 +13,7 @@ import steps.SearchPageSteps;
 import java.time.Duration;
 import java.util.Objects;
 /**
- * Базовый класс всех тестов
+ * Базовый класс всех тестов.
  * Содержит методы для инициализации WebDriver/классов, открытие браузера, ожидания загрузки, открытия страницы и закрытия браузера
  */
 public class BaseTest {
@@ -45,7 +45,7 @@ public class BaseTest {
      */
     @Step("Ожидание загрузни страницы")
     public void waitLoadPage() {
-        wait = new WebDriverWait(driver, Duration.ofSeconds(Integer.parseInt(ConfigReader.get("timeout"))));
+        wait = new WebDriverWait(driver, Duration.ofSeconds(ConfigReader.getInt("timeout")));
         wait.until(webDriver -> Objects.equals(((JavascriptExecutor) webDriver).executeScript("return document.readyState"), "complete"));
     }
 

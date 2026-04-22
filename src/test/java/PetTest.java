@@ -11,7 +11,7 @@ public class PetTest extends BaseTest {
     @ParameterizedTest
     @CsvFileSource(resources = "testData/laptops.csv", numLinesToSkip = 1)
     public void testBellIntegrator(String priceFrom, String priceTo, String brands, String countElements) {
-        goPage(ConfigReader.get("base.url"));
+        goPage(ConfigReader.getString("base.url"));
         waitLoadPage();
         mainPageSteps.clickBtnApplyCookies();
         mainPageSteps.moveToAndClickBtnCatalog();
@@ -26,6 +26,7 @@ public class PetTest extends BaseTest {
         laptopPageSteps.setPrice(priceFrom, priceTo);
         boolean brandFound = laptopPageSteps.setModel(brands);
         laptopPageSteps.loadAllProducts();
+        waitLoadPage();
         CustomAssertions.assertProductCountMoreThan(
                 laptopPageSteps.checkCountElementsOnPage(),
                 Integer.parseInt(countElements)
@@ -43,7 +44,7 @@ public class PetTest extends BaseTest {
         waitLoadPage();
         CustomAssertions.assertProductFound(
                 searchPageSteps.checkSearchLaptopName(nameFirstProduct),
-                brands
+                nameFirstProduct
         );
 
     }
