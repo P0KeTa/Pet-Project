@@ -14,5 +14,4 @@ public class SearchPage {
     }
 
     protected static final By productLocatorName = By.xpath("//div[@class='cia-cs _1pFpJ']//span[@title]");
-    public static final By inputSearch = By.xpath("//input[@id='header-search']");
 }

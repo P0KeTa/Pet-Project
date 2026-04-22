@@ -5,9 +5,10 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import ru.p0keta.Yandex.Market.steps.LaptopPageSteps;
-import ru.p0keta.Yandex.Market.steps.MainPageSteps;
-import ru.p0keta.Yandex.Market.steps.SearchPageSteps;
+import ru.p0keta.Yandex.Market.ConfigReader;
+import steps.LaptopPageSteps;
+import steps.MainPageSteps;
+import steps.SearchPageSteps;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -21,6 +22,7 @@ public class BaseTest {
     MainPageSteps mainPageSteps;
     LaptopPageSteps laptopPageSteps;
     SearchPageSteps searchPageSteps;
+    WebDriverWait wait;
 
     @Step("Открытие браузера и инициализация WebDriver и классов")
     @BeforeEach
@@ -38,9 +40,12 @@ public class BaseTest {
         driver.get(urlPage);
     }
 
+    /**
+     * Ожидание загрузки страницы
+     */
     @Step("Ожидание загрузни страницы")
     public void waitLoadPage() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(Integer.parseInt(ConfigReader.get("timeout"))));
+        wait = new WebDriverWait(driver, Duration.ofSeconds(Integer.parseInt(ConfigReader.get("timeout"))));
         wait.until(webDriver -> Objects.equals(((JavascriptExecutor) webDriver).executeScript("return document.readyState"), "complete"));
     }
 

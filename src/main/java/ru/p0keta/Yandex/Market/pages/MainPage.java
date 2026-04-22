@@ -17,6 +17,8 @@ public class MainPage {
     protected static final By btnCatalog = By.xpath("//div[@data-zone-name='catalog']");
     protected static final By electronicalSection = By.xpath("//div[@data-auto='catalog-content']//span[text()='Электроника']");
     protected static final By btnLaptop = By.xpath("//a[text()='Ноутбуки']");
+    protected static final By inputSearch = By.xpath("//input[@id='header-search']");
+    protected static final By btnSearch = By.xpath("//button[@data-auto='search-button']");
 
 
 }

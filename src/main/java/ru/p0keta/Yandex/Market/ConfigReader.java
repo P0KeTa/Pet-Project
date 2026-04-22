@@ -1,5 +1,7 @@
-import java.io.FileInputStream;
+package ru.p0keta.Yandex.Market;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -10,8 +12,12 @@ public class ConfigReader {
     private static final Properties properties = new Properties();
 
     static {
-        try (FileInputStream fis = new FileInputStream("src/test/resources/config.properties")) {
-            properties.load(fis);
+        try (InputStream inputStream = ConfigReader.class
+                .getClassLoader()
+                .getResourceAsStream("config.properties")) {
+            if (inputStream != null) {
+                properties.load(inputStream);
+            }
         } catch (IOException e) {
             throw new RuntimeException("Не удалось загрузить config.properties", e);
         }

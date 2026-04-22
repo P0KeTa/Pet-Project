@@ -13,7 +13,9 @@ public class LaptopPage extends MainPage {
 
     protected static final By laptopText = By.xpath("//h1[contains(text(),'Ноутбуки')]");
     protected static final By inputPriceFrom = By.xpath("//input[@id='range-filter-field-glprice_25563_min']");
+    protected static final By buttonPriceFromClear = By.xpath("//div[@data-node-id='etzr_5i90_4']//button[@title='Очистить']");
     protected static final By inputPriceTo = By.xpath("//input[@id='range-filter-field-glprice_25563_max']");
+    protected static final By inputPriceToClear = By.xpath("//div[@data-node-id='etzr_5i90_5']//button[@title='Очистить']");
     protected static final By btnGetAll = By.xpath("//button[.//span[contains(text(),'Показать всё')]]");
     protected static final By inputModel = By.xpath("//input[@id='textfield9248505620']");
     protected static final By inputModelCancel = By.xpath("//div[@class='_3vybc']//div[@class='_2xL77 _3Y8VG']");

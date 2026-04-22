@@ -1,4 +1,4 @@
-package ru.p0keta.Yandex.Market.steps;
+package steps;
 
 import io.qameta.allure.Step;
 import org.openqa.selenium.WebDriver;

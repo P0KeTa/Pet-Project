@@ -1,17 +1,16 @@
-package ru.p0keta.Yandex.Market.steps;
+package steps;
 
 import io.qameta.allure.Step;
 import org.jspecify.annotations.NonNull;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import ru.p0keta.Yandex.Market.ConfigReader;
 import ru.p0keta.Yandex.Market.pages.LaptopPage;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-
-import static ru.p0keta.Yandex.Market.pages.SearchPage.inputSearch;
 
 /**
  * Шаги для работы со страницей ноутбуков на Яндекс.Маркете.
@@ -19,13 +18,16 @@ import static ru.p0keta.Yandex.Market.pages.SearchPage.inputSearch;
  */
 public class LaptopPageSteps extends LaptopPage {
 
-    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(Integer.parseInt(ConfigReader.get("timeout"))));
     WebElement element;
 
     public LaptopPageSteps(WebDriver driver) {
         super(driver);
     }
 
+    /**
+     * Проверяет, что перешли нужный раздел (Ноутбуки).
+     */
     @Step("Убедимся что перешли в раздел Ноутбуки")
     public boolean checkLaptopPage() {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(laptopText)).isDisplayed();
@@ -35,12 +37,23 @@ public class LaptopPageSteps extends LaptopPage {
      * Устанавливает диапазон цены.
      *
      * @param priceFrom нижняя граница цены
-     * @param priceTo верхняя граница цены
+     * @param priceTo   верхняя граница цены
      */
     @Step("Установка параметра Цена")
     public void setPrice(String priceFrom, String priceTo) {
-        driver.findElement(inputPriceFrom).sendKeys(priceFrom);
-        driver.findElement(inputPriceTo).sendKeys(priceTo);
+        if (driver.findElements(buttonPriceFromClear).isEmpty()) {
+            driver.findElement(inputPriceFrom).sendKeys(priceFrom);
+        } else {
+            driver.findElement(buttonPriceFromClear).click();
+            driver.findElement(inputPriceFrom).sendKeys(priceFrom);
+        }
+
+        if (driver.findElements(inputPriceToClear).isEmpty()) {
+            driver.findElement(inputPriceTo).sendKeys(priceTo);
+        } else {
+            driver.findElement(inputPriceToClear).click();
+            driver.findElement(inputPriceTo).sendKeys(priceTo);
+        }
     }
 
     /**
@@ -81,6 +94,11 @@ public class LaptopPageSteps extends LaptopPage {
         return brandFound;
     }
 
+    /**
+     * Проверяет, кол-во элементов товара на первой странице
+     *
+     * @return кол-во товаров
+     */
     @Step("Проверяем кол-во элементов на первой странице")
     public int checkCountElementsOnPage() {
         List<WebElement> products = driver.findElements(productLocator);
@@ -107,14 +125,15 @@ public class LaptopPageSteps extends LaptopPage {
             if (noChanges >= 3 && isAtBottom()) {
                 break;
             }
-            js.executeScript("window.scrollBy(0, 500)");
+            js.executeScript("window.scrollBy(0, 600)");
             waitForMoreProducts(lastCount);
         }
         //Скролл в начало страницы
         js.executeScript("window.scrollTo(0, 0);");
     }
+
     private void waitForMoreProducts(int previousCount) {
-        long endTime = System.currentTimeMillis() + 700L;
+        long endTime = System.currentTimeMillis() + 800L;
         while (System.currentTimeMillis() < endTime) {
             int currentCount = driver.findElements(productLocator).size();
             if (currentCount > previousCount) {
@@ -122,6 +141,7 @@ public class LaptopPageSteps extends LaptopPage {
             }
         }
     }
+
     private boolean isAtBottom() {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         Object result = js.executeScript(
@@ -133,11 +153,11 @@ public class LaptopPageSteps extends LaptopPage {
      * Проверяет, что цены всех товаров находятся в заданном диапазоне.
      *
      * @param priceFrom нижняя граница цены
-     * @param priceTo верхняя граница цены
+     * @param priceTo   верхняя граница цены
      * @return список некорректных значений цен
      */
     @Step("Проверяем соответствие фильтра Цена")
-    public boolean checkPrice(String priceFrom, String priceTo) {
+    public List<String> checkPrice(String priceFrom, String priceTo) {
         List<WebElement> products = driver.findElements(productLocatorPrice);
         List<String> result = new ArrayList<>();
 
@@ -155,7 +175,7 @@ public class LaptopPageSteps extends LaptopPage {
                 result.add(String.valueOf(price));
             }
         }
-        return result.isEmpty();
+        return result;
     }
 
     /**
@@ -165,33 +185,40 @@ public class LaptopPageSteps extends LaptopPage {
      * @return список товаров, которые не соответствуют фильтру
      */
     @Step("Проверяем соответствие фильтра Модель")
-    public List<String> checkModel(@NonNull String brands) {
+    public List<String> checkBrands(@NonNull String brands) {
         List<WebElement> products = driver.findElements(productLocatorName);
         List<String> result = new ArrayList<>();
-        String[] modelsArr = brands.split(",");
-
-        for (WebElement product : products) {
-            String title = product.getText().trim().toLowerCase();
-            boolean matches = false;
-            for (String s : modelsArr) {
-                if (title.contains(s.trim().toLowerCase())) {
-                    matches = true;
-                    break;
+        String[] brandsArr = brands.split(",");
+        if (brandsArr.length > 0) {
+            for (WebElement product : products) {
+                String title = product.getText().trim().toLowerCase();
+                boolean matches = false;
+                for (String b : brandsArr) {
+                    if (title.contains(b.trim().toLowerCase())) {
+                        matches = true;
+                        break;
+                    }
                 }
-            }
-            if (!matches) {
-                result.add(title);
+                if (!matches) {
+                    result.add(title);
+                }
             }
         }
         return result;
     }
 
+    /**
+     * Берёт название первого элемента на странице (карточки товара),
+     * вводит его в поле поиска и кликает по кнопке Найти.
+     */
     @Step("Вводим в поисковую строку наименование ноутбука из первой карточки и кликаем по кнопке Найти")
     public String enterNameToInputSearch() {
         List<WebElement> products = driver.findElements(productLocatorName);
         String nameFirstProduct = products.get(0).getText();
-        driver.findElement(inputSearch).sendKeys(nameFirstProduct + Keys.ENTER);
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(5));
+        driver.findElement(inputSearch).sendKeys(nameFirstProduct);
+        driver.findElement(btnSearch).click();
+        driver.manage().timeouts()
+                .pageLoadTimeout(Duration.ofSeconds(Integer.parseInt(ConfigReader.get("timeout"))));
         return nameFirstProduct;
     }
 }
